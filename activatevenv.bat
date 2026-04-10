@@ -1,1 +1,1 @@
-.\venv_manutencaoauto-api\Scripts\activate.bat
+.\venv_manutencaoauto-api\Scripts\Activate.ps1
