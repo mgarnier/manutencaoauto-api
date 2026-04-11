@@ -3,7 +3,7 @@ from flask_openapi3 import OpenAPI, Info, Tag
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from database import db
-from models import Servico
+from models import Servico, Manutencao_Servico
 from sqlalchemy.exc import IntegrityError
 from flask import abort
 from typing import List
@@ -44,6 +44,10 @@ class ServicoPathParam(BaseModel):
         title = "Servico Path Parameters"
     
     id: int = Field(..., description="ID do serviço")
+
+
+class ServicoDeletadoResponse(BaseModel):
+    message: str = Field(..., description="Mensagem de confirmação")
 
 
 @app.post(
@@ -93,3 +97,33 @@ def obter_servico(path: ServicoPathParam) -> dict:
     if not servico:
         abort(404, description="Serviço não encontrado")
     return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).dict()
+
+
+@app.delete(
+    "/servicos/<int:id>",
+    tags=[servico_tag],
+    summary="Deletar serviço",
+    description="Deleta um serviço pelo seu ID. Retorna 409 se o serviço possui referências em manutenções",
+    responses={"200": ServicoDeletadoResponse, "404": {"description": "Serviço não encontrado"}, "409": {"description": "Serviço possui manutenções associadas"}}
+)
+def deletar_servico(path: ServicoPathParam) -> dict:
+    """Deleta um serviço
+    
+    Remove um serviço do banco de dados. Não permite deleção se há manutenções associadas.
+    """
+    servico = Servico.query.get(path.id)
+    if not servico:
+        abort(404, description="Serviço não encontrado")
+    
+    # Verificar se existem registros relacionados em manutencao_servico
+    manutencao_servico = Manutencao_Servico.query.filter_by(id_servico=path.id).first()
+    if manutencao_servico:
+        abort(409, description="Serviço possui manutenções associadas e não pode ser deletado")
+    
+    try:
+        db.session.delete(servico)
+        db.session.commit()
+        return ServicoDeletadoResponse(message="Serviço deletado com sucesso").dict(), 200
+    except Exception as e:
+        db.session.rollback()
+        abort(400, description=f"Erro ao deletar serviço: {str(e)}")
