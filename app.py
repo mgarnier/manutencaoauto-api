@@ -5,6 +5,8 @@ from config import Config
 from database import db
 from models import Servico
 from sqlalchemy.exc import IntegrityError
+from flask import abort
+from typing import List
 info = Info(title="ManutençãoAuto API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 
@@ -17,13 +19,7 @@ with app.app_context():
     db.create_all()
 
 # Tag para organizar endpoints
-greeting_tag = Tag(name="greeting", description="Endpoints de saudação")
 servico_tag = Tag(name="servico", description="Endpoints de serviços")
-
-
-# Modelo de resposta
-class GreetingResponse(BaseModel):
-    message: str = Field(..., description="Mensagem de saudação")
 
 
 class ServicoCriacao(BaseModel):
@@ -39,19 +35,8 @@ class ServicoResponse(BaseModel):
     preco: float = Field(..., description="Preço do serviço")
 
 
-@app.get(
-    "/",
-    tags=[greeting_tag],
-    summary="Saudação",
-    description="Retorna uma mensagem de saudação simples",
-    responses={"200": GreetingResponse}
-)
-def hello_world() -> dict:
-    """Endpoint de saudação
-    
-    Retorna uma mensagem 'Hello, World!' em formato JSON.
-    """
-    return {"message": "Hello, World!"}
+class ServicoListResponse(BaseModel):
+    servicos: List[ServicoResponse] = Field(..., description="Lista de serviços")
 
 
 @app.post(
@@ -74,3 +59,30 @@ def criar_servico(body: ServicoCriacao) -> dict:
     except IntegrityError:
         db.session.rollback()
         return {"error": "Serviço com este nome já existe ou erro de integridade"}, 400
+
+
+@app.get(
+    "/servicos",
+    tags=[servico_tag],
+    summary="Listar serviços",
+    description="Retorna a lista de todos os serviços",
+    responses={"200": ServicoListResponse}
+)
+def listar_servicos() -> list:
+    servicos = Servico.query.all()
+    servico_responses = [ServicoResponse(id=s.id, nome=s.nome, frequencia=s.frequencia, preco=s.preco) for s in servicos]
+    return ServicoListResponse(servicos=servico_responses).dict()
+
+
+@app.get(
+    "/servicos/<int:id>",
+    tags=[servico_tag],
+    summary="Obter serviço por ID",
+    description="Retorna um serviço específico pelo seu ID",
+    responses={"200": ServicoResponse, "404": {"description": "Serviço não encontrado"}}
+)
+def obter_servico(id: int) -> dict:
+    servico = Servico.query.get(id)
+    if not servico:
+        abort(404, description="Serviço não encontrado")
+    return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).dict()
