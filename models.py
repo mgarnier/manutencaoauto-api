@@ -8,12 +8,12 @@ class Servico(db.Model):
     preco = db.Column(db.Numeric(10, 2), nullable=False)
 
     def __repr__(self):
-        return f'<Servico {self.nome}>'
+        return f'<Serviço {self.nome}>'
 
 class Manutencao(db.Model):
     __tablename__ = 'manutencao'
     id = db.Column(db.Integer, primary_key=True)
-    descricao = db.Column(db.String(255), nullable=False)
+    descricao = db.Column(db.String(50), nullable=False)
     quilometragem = db.Column(db.Integer, nullable=False)
     data_prevista = db.Column(db.Date, nullable=True)
     data_realizada = db.Column(db.Date, nullable=True)
@@ -21,12 +21,12 @@ class Manutencao(db.Model):
     __table_args__ = (
         db.CheckConstraint(
             'data_prevista IS NOT NULL OR data_realizada IS NOT NULL',
-            name='ck_manutencao_data_not_both_null'
+            name='ck_manutencao_data_informada'
         ),
     )
 
     def __repr__(self):
-        return f'<Manutencao {self.id} - {self.descricao}>'
+        return f'<Manutenção {self.descricao}>'
 
 class Manutencao_Servico(db.Model):
     __tablename__ = 'manutencao_servico'
