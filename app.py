@@ -63,6 +63,11 @@ class ServicoDeletadoResponse(BaseModel):
 class ServicoErroResponse(BaseModel):
     class Config:
         title = "Servico Error Response"
+        schema_extra = {
+            "example": {
+                "error": "Serviço não encontrado"
+            }
+        }
 
     error: str = Field(..., description="Mensagem de erro ao processar a requisição")
 
@@ -72,7 +77,7 @@ class ServicoErroResponse(BaseModel):
     tags=[servico_tag],
     summary="Criar serviço",
     description="Cria um novo serviço no banco de dados usando um payload JSON com nome, frequência e preço.",
-    responses={"201": ServicoResponse, "400": ServicoErroResponse, "422": {"description": "Body inválido ou dados de validação incorretos"}}
+    responses={"201": ServicoResponse, "400": ServicoErroResponse, "422": ServicoErroResponse}
 )
 def criar_servico(body: ServicoCriacao) -> dict:
     """Cria um novo serviço usando o corpo JSON.
@@ -87,7 +92,7 @@ def criar_servico(body: ServicoCriacao) -> dict:
         return ServicoResponse(id=novo_servico.id, nome=novo_servico.nome, frequencia=novo_servico.frequencia, preco=novo_servico.preco).dict(), 201
     except IntegrityError:
         db.session.rollback()
-        return {"error": "Serviço com este nome já existe ou erro de integridade"}, 400
+        return ServicoErroResponse(error="Serviço com este nome já existe ou erro de integridade").dict(), 400
 
 
 @app.get(
