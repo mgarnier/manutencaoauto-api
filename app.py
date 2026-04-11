@@ -23,6 +23,16 @@ servico_tag = Tag(name="servico", description="Endpoints de serviços")
 
 
 class ServicoCriacao(BaseModel):
+    class Config:
+        title = "Servico Request Body"
+        schema_extra = {
+            "example": {
+                "nome": "Troca de óleo",
+                "frequencia": 90,
+                "preco": 199.90
+            }
+        }
+
     nome: str = Field(..., description="Nome do serviço")
     frequencia: int = Field(..., description="Frequência do serviço em dias")
     preco: float = Field(..., description="Preço do serviço")
@@ -50,17 +60,25 @@ class ServicoDeletadoResponse(BaseModel):
     message: str = Field(..., description="Mensagem de confirmação")
 
 
+class ServicoErroResponse(BaseModel):
+    class Config:
+        title = "Servico Error Response"
+
+    error: str = Field(..., description="Mensagem de erro ao processar a requisição")
+
+
 @app.post(
     "/servicos",
     tags=[servico_tag],
     summary="Criar serviço",
-    description="Cria um novo serviço no banco de dados",
-    responses={"201": ServicoResponse, "400": {"description": "Erro de validação ou integridade"}}
+    description="Cria um novo serviço no banco de dados usando um payload JSON com nome, frequência e preço.",
+    responses={"201": ServicoResponse, "400": ServicoErroResponse, "422": {"description": "Body inválido ou dados de validação incorretos"}}
 )
 def criar_servico(body: ServicoCriacao) -> dict:
-    """Cria um novo serviço
+    """Cria um novo serviço usando o corpo JSON.
     
     Recebe os dados do serviço e o salva no banco de dados.
+    O body é validado pelo schema ServicoCriacao.
     """
     try:
         novo_servico = Servico(nome=body.nome, frequencia=body.frequencia, preco=body.preco)
