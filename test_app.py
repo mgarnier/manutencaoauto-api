@@ -1,0 +1,51 @@
+import unittest
+from app import app
+from database import db
+
+
+class ServicoApiTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = app
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+    def test_criar_servico(self):
+        payload = {
+            "nome": "Troca de óleo",
+            "frequencia": 90,
+            "preco": 199.90
+        }
+        response = self.client.post("/servicos", json=payload)
+        self.assertEqual(response.status_code, 201)
+
+        data = response.get_json()
+        self.assertIsInstance(data, dict)
+        self.assertIn("id", data)
+        self.assertEqual(data["nome"], payload["nome"])
+        self.assertEqual(data["frequencia"], payload["frequencia"])
+        self.assertEqual(data["preco"], payload["preco"])
+
+    def test_criar_servico_duplicado_retorna_400(self):
+        payload = {
+            "nome": "Alinhamento",
+            "frequencia": 180,
+            "preco": 120.00
+        }
+        first_response = self.client.post("/servicos", json=payload)
+        self.assertEqual(first_response.status_code, 201)
+
+        second_response = self.client.post("/servicos", json=payload)
+        self.assertEqual(second_response.status_code, 400)
+        data = second_response.get_json()
+        self.assertEqual(data.get("error"), "Serviço com este nome já existe ou erro de integridade")
+
+
+if __name__ == "__main__":
+    unittest.main()
