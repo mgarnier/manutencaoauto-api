@@ -39,6 +39,13 @@ class ServicoListResponse(BaseModel):
     servicos: List[ServicoResponse] = Field(..., description="Lista de serviços")
 
 
+class ServicoPathParam(BaseModel):
+    class Config:
+        title = "Servico Path Parameters"
+    
+    id: int = Field(..., description="ID do serviço")
+
+
 @app.post(
     "/servicos",
     tags=[servico_tag],
@@ -81,8 +88,8 @@ def listar_servicos() -> list:
     description="Retorna um serviço específico pelo seu ID",
     responses={"200": ServicoResponse, "404": {"description": "Serviço não encontrado"}}
 )
-def obter_servico(id: int) -> dict:
-    servico = Servico.query.get(id)
+def obter_servico(path: ServicoPathParam) -> dict:
+    servico = Servico.query.get(path.id)
     if not servico:
         abort(404, description="Serviço não encontrado")
     return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).dict()
