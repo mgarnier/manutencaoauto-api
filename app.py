@@ -1,12 +1,16 @@
-from pydantic import BaseModel, Field
+from typing import List
+
+from flask import abort
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask_sqlalchemy import SQLAlchemy
+from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
+
 from config import Config
 from database import db
-from models import Servico, Manutencao_Servico
-from sqlalchemy.exc import IntegrityError
-from flask import abort
-from typing import List
+from models import Manutencao_Servico, Servico
+
+
 info = Info(title="ManutençãoAuto API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 

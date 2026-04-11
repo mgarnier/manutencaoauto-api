@@ -1,5 +1,6 @@
 from database import db
 
+
 class Servico(db.Model):
     __tablename__ = 'servico'
     id = db.Column(db.Integer, primary_key=True)
