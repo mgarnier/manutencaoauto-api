@@ -1,9 +1,16 @@
 from pydantic import BaseModel, Field
 from flask_openapi3 import OpenAPI, Info, Tag
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
 
 # Configurar informações da API
 info = Info(title="ManutençãoAuto API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
+
+# Configurar banco de dados
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # Tag para organizar endpoints
 greeting_tag = Tag(name="greeting", description="Endpoints de saudação")
