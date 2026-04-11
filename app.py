@@ -108,12 +108,12 @@ def listar_servicos() -> list:
     tags=[servico_tag],
     summary="Obter serviço por ID",
     description="Retorna um serviço específico pelo seu ID",
-    responses={"200": ServicoResponse, "404": {"description": "Serviço não encontrado"}}
+    responses={"200": ServicoResponse, "404": ServicoErroResponse}
 )
 def obter_servico(path: ServicoPathParam) -> dict:
     servico = Servico.query.get(path.id)
     if not servico:
-        abort(404, description="Serviço não encontrado")
+        return ServicoErroResponse(error="Serviço não encontrado").dict(), 404
     return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).dict()
 
 
@@ -122,7 +122,7 @@ def obter_servico(path: ServicoPathParam) -> dict:
     tags=[servico_tag],
     summary="Deletar serviço",
     description="Deleta um serviço pelo seu ID. Retorna 409 se o serviço possui referências em manutenções",
-    responses={"200": ServicoDeletadoResponse, "404": {"description": "Serviço não encontrado"}, "409": {"description": "Serviço possui manutenções associadas"}}
+    responses={"200": ServicoDeletadoResponse, "404": ServicoErroResponse, "409": ServicoErroResponse}
 )
 def deletar_servico(path: ServicoPathParam) -> dict:
     """Deleta um serviço
@@ -131,12 +131,12 @@ def deletar_servico(path: ServicoPathParam) -> dict:
     """
     servico = Servico.query.get(path.id)
     if not servico:
-        abort(404, description="Serviço não encontrado")
+        return ServicoErroResponse(error="Serviço não encontrado").dict(), 404
     
     # Verificar se existem registros relacionados em manutencao_servico
     manutencao_servico = Manutencao_Servico.query.filter_by(id_servico=path.id).first()
     if manutencao_servico:
-        abort(409, description="Serviço possui manutenções associadas e não pode ser deletado")
+        return ServicoErroResponse(error="Serviço possui manutenções associadas e não pode ser deletado").dict(), 409
     
     try:
         db.session.delete(servico)
@@ -144,4 +144,4 @@ def deletar_servico(path: ServicoPathParam) -> dict:
         return ServicoDeletadoResponse(message="Serviço deletado com sucesso").dict(), 200
     except Exception as e:
         db.session.rollback()
-        abort(400, description=f"Erro ao deletar serviço: {str(e)}")
+        return ServicoErroResponse(error=f"Erro ao deletar serviço: {str(e)}").dict(), 400
