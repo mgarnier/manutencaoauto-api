@@ -1,4 +1,5 @@
-from flask_openapi3 import OpenAPI, Info
+from flask_openapi3.models.info import Info
+from flask_openapi3.openapi import OpenAPI
 
 from config import get_config_class
 from manutencaoauto_api.db import init_db
