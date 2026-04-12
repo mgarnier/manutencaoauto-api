@@ -24,7 +24,7 @@ servico_bp = APIBlueprint("servico", __name__)
 )
 def listar_servicos() -> list:
     servicos = Servico.query.all()
-    servico_responses = [ServicoResponse(id=s.id, nome=s.nome, frequencia=s.frequencia, preco=s.preco) for s in servicos]
+    servico_responses = [ServicoResponse.model_validate(s) for s in servicos]
     return ServicoListResponse(servicos=servico_responses).model_dump()
 
 
@@ -39,7 +39,7 @@ def obter_servico(path: IdPathParam) -> dict:
     servico = Servico.query.get(path.id)
     if not servico:
         return ErrorResponse(error="Serviço não encontrado").model_dump(), 404
-    return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).model_dump()
+    return ServicoResponse.model_validate(servico).model_dump()
 
 
 @servico_bp.post(
@@ -59,7 +59,7 @@ def criar_servico(body: ServicoCriacao) -> dict:
         novo_servico = Servico(nome=body.nome, frequencia=body.frequencia, preco=body.preco)
         db.session.add(novo_servico)
         db.session.commit()
-        return ServicoResponse(id=novo_servico.id, nome=novo_servico.nome, frequencia=novo_servico.frequencia, preco=novo_servico.preco).model_dump(), 201
+        return ServicoResponse.model_validate(novo_servico).model_dump(), 201
     except IntegrityError:
         db.session.rollback()
         return ErrorResponse(error="Serviço com este nome já existe ou erro de integridade").model_dump(), 400

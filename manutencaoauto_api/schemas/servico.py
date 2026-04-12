@@ -19,6 +19,8 @@ class ServicoCriacao(BaseModel):
 
 
 class ServicoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int = Field(..., description="ID do serviço")
     nome: str = Field(..., description="Nome do serviço")
     frequencia: int = Field(..., description="Frequência do serviço em dias")
