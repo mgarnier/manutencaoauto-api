@@ -1,7 +1,7 @@
 from flask_openapi3 import OpenAPI, Info
 
 from config import get_config_class
-from database import init_db
+from manutencaoauto_api.db import init_db
 from manutencaoauto_api.routes.servico import servico_bp
 
 

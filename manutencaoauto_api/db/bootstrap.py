@@ -6,6 +6,6 @@ def init_db(app, create_tables: bool = True) -> None:
         db.init_app(app)
     if create_tables:
         with app.app_context():
-            # Ensure model metadata is loaded before create_all.
-            import models  # noqa: F401
+            # Ensure model metadata is registered before create_all.
+            import manutencaoauto_api.models  # noqa: F401
             db.create_all()

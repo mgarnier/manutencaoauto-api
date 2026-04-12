@@ -1,7 +1,7 @@
 import unittest
 
 from app import app
-from database import db
+from manutencaoauto_api.db import db
 
 
 class ServicoApiTestCase(unittest.TestCase):

@@ -1,5 +1,5 @@
 from app import app
-from database import init_db
+from manutencaoauto_api.db import init_db
 
 
 init_db(app)

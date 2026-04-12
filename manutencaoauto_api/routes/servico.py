@@ -4,8 +4,8 @@ from flask_openapi3 import APIBlueprint, Tag
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import IntegrityError
 
-from database import db
-from models import Manutencao_Servico, Servico
+from manutencaoauto_api.db import db
+from manutencaoauto_api.models import Manutencao_Servico, Servico
 
 
 servico_tag = Tag(name="servico", description="Endpoints de serviços")
