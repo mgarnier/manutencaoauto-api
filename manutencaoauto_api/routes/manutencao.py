@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from manutencaoauto_api.db import db
 from manutencaoauto_api.exceptions import (
-    ManutencaoComReferencias,
     ManutencaoDadosInvalidos,
     ManutencaoErroOperacao,
     ManutencaoNaoEncontrada,
@@ -85,11 +84,8 @@ def criar_manutencao(body: ManutencaoCriacao) -> RouteResponse:
     "/manutencoes/<int:id>",
     tags=[manutencao_tag],
     summary="Deletar manutenção",
-    description=(
-        "Deleta uma manutenção pelo ID. Retorna 409 se a manutenção possuir "
-        "serviços associados."
-    ),
-    responses={"200": MessageResponse, "404": ErrorResponse, "409": ErrorResponse},
+    description="Deleta uma manutenção pelo ID.",
+    responses={"200": MessageResponse, "404": ErrorResponse, "400": ErrorResponse},
 )
 def deletar_manutencao(path: IdPathParam) -> RouteResponse:
     try:
@@ -97,7 +93,5 @@ def deletar_manutencao(path: IdPathParam) -> RouteResponse:
         return MessageResponse(message="Manutenção deletada com sucesso").model_dump(), 200
     except ManutencaoNaoEncontrada as exc:
         return ErrorResponse(error=str(exc)).model_dump(), 404
-    except ManutencaoComReferencias as exc:
-        return ErrorResponse(error=str(exc)).model_dump(), 409
     except ManutencaoErroOperacao as exc:
         return ErrorResponse(error=str(exc)).model_dump(), 400

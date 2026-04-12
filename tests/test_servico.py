@@ -20,6 +20,17 @@ class ServicoApiTestCase(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
+    def _criar_manutencao(self) -> int:
+        payload = {
+            "descricao": "Revisão de freios",
+            "quilometragem": 45000,
+            "data_prevista": "2026-11-10",
+            "data_realizada": None,
+        }
+        response = self.client.post("/manutencoes", json=payload)
+        self.assertEqual(response.status_code, 201)
+        return response.get_json()["id"]
+
     def test_criar_servico(self):
         payload = {
             "nome": "Troca de óleo",
@@ -49,6 +60,32 @@ class ServicoApiTestCase(unittest.TestCase):
         self.assertEqual(second_response.status_code, 400)
         data = second_response.get_json()
         self.assertEqual(data.get("error"), "Serviço com este nome já existe ou erro de integridade")
+
+    def test_deletar_servico_com_referencias_retorna_409(self):
+        servico_payload = {
+            "nome": "Troca de pastilhas",
+            "frequencia_km": 30000,
+            "preco": 299.90,
+        }
+        servico_response = self.client.post("/servicos", json=servico_payload)
+        self.assertEqual(servico_response.status_code, 201)
+        id_servico = servico_response.get_json()["id"]
+
+        id_manutencao = self._criar_manutencao()
+        associacao_path = (
+            f"/manutencao-servicos?id_manutencao={id_manutencao}&id_servico={id_servico}"
+        )
+        associacao_response = self.client.post(associacao_path, json={"preco": 299.90})
+        self.assertEqual(associacao_response.status_code, 201)
+
+        delete_response = self.client.delete(f"/servicos/{id_servico}")
+        self.assertEqual(delete_response.status_code, 409)
+
+        data = delete_response.get_json()
+        self.assertEqual(
+            data.get("error"),
+            "Serviço possui manutenções associadas e não pode ser deletado",
+        )
 
 
 if __name__ == "__main__":

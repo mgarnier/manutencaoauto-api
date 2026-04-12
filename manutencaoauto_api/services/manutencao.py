@@ -4,12 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from manutencaoauto_api.exceptions import (
-    ManutencaoComReferencias,
     ManutencaoDadosInvalidos,
     ManutencaoErroOperacao,
     ManutencaoNaoEncontrada,
 )
-from manutencaoauto_api.models import Manutencao, ManutencaoServico
+from manutencaoauto_api.models import Manutencao
 
 
 class ManutencaoService:
@@ -55,12 +54,6 @@ class ManutencaoService:
         manutencao = self._session.get(Manutencao, manutencao_id)
         if not manutencao:
             raise ManutencaoNaoEncontrada()
-
-        manutencao_servico = self._session.execute(
-            select(ManutencaoServico).filter_by(id_manutencao=manutencao_id)
-        ).scalar_one_or_none()
-        if manutencao_servico:
-            raise ManutencaoComReferencias()
 
         try:
             self._session.delete(manutencao)

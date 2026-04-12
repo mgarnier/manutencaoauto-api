@@ -44,14 +44,6 @@ class ManutencaoDadosInvalidos(ManutencaoErro):
         super().__init__(message)
 
 
-class ManutencaoComReferencias(ManutencaoErro):
-    def __init__(
-        self,
-        message: str = "Manutenção possui serviços associados e não pode ser deletada",
-    ) -> None:
-        super().__init__(message)
-
-
 class ManutencaoErroOperacao(ManutencaoErro):
     pass
 

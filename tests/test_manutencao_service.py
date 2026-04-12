@@ -1,15 +1,16 @@
 import unittest
 from datetime import date
 
+from sqlalchemy import select
+
 from app import create_app
 from config import TestingConfig
 from manutencaoauto_api.db import db
 from manutencaoauto_api.exceptions import (
-    ManutencaoComReferencias,
     ManutencaoDadosInvalidos,
     ManutencaoNaoEncontrada,
 )
-from manutencaoauto_api.models import ManutencaoServico, Servico
+from manutencaoauto_api.models import Manutencao, ManutencaoServico, Servico
 from manutencaoauto_api.services import ManutencaoService
 
 
@@ -47,7 +48,7 @@ class ManutencaoServiceTestCase(unittest.TestCase):
         with self.assertRaises(ManutencaoNaoEncontrada):
             self.service.obter(999)
 
-    def test_deletar_com_referencias_lanca_erro(self):
+    def test_deletar_com_referencias_remove_associacoes(self):
         manutencao = self.service.criar(
             "Revisão completa",
             52000,
@@ -68,8 +69,18 @@ class ManutencaoServiceTestCase(unittest.TestCase):
         db.session.add(associacao)
         db.session.commit()
 
-        with self.assertRaises(ManutencaoComReferencias):
-            self.service.deletar(manutencao.id)
+        self.service.deletar(manutencao.id)
+
+        manutencao_removida = db.session.get(Manutencao, manutencao.id)
+        associacao_removida = db.session.execute(
+            select(ManutencaoServico).filter_by(
+                id_manutencao=manutencao.id,
+                id_servico=servico.id,
+            )
+        ).scalar_one_or_none()
+
+        self.assertIsNone(manutencao_removida)
+        self.assertIsNone(associacao_removida)
 
 
 if __name__ == "__main__":

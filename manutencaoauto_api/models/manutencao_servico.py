@@ -6,7 +6,7 @@ class ManutencaoServico(db.Model):
 
     id_manutencao = db.Column(
         db.Integer,
-        db.ForeignKey("manutencao.id"),
+        db.ForeignKey("manutencao.id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
