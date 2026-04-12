@@ -29,6 +29,12 @@ class ManutencaoApiTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         return response.get_json()["id"]
 
+    def test_raiz_api_redireciona_para_swagger(self):
+        response = self.client.get("/", follow_redirects=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/openapi/swagger", response.location)
+
     def test_criar_manutencao_valida_retorna_201(self):
         payload = {
             "descricao": "Troca de correia",

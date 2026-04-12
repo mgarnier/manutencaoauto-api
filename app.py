@@ -1,6 +1,7 @@
 from flask_openapi3.models.info import Info
 from flask_openapi3.openapi import OpenAPI
 from flask_cors import CORS
+from flask import redirect
 
 from config import get_config_class
 from manutencaoauto_api.db import init_db
@@ -33,6 +34,10 @@ def create_app(config_class=None):
     app.config.from_object(config_class)
     init_db(app)
     register_routes(app)
+
+    @app.route("/")
+    def redirect_to_swagger():
+        return redirect("/openapi/swagger")
 
     return app
 
