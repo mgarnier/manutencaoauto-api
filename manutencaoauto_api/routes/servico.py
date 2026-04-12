@@ -2,7 +2,7 @@ from flask_openapi3 import APIBlueprint, Tag
 from sqlalchemy.exc import IntegrityError
 
 from manutencaoauto_api.db import db
-from manutencaoauto_api.models import Manutencao_Servico, Servico
+from manutencaoauto_api.models import ManutencaoServico, Servico
 from manutencaoauto_api.schemas.common import ErrorResponse, IdPathParam, MessageResponse
 from manutencaoauto_api.schemas.servico import (
     ServicoCriacao,
@@ -82,7 +82,7 @@ def deletar_servico(path: IdPathParam) -> dict:
         return ErrorResponse(error="Serviço não encontrado").model_dump(), 404
 
     manutencao_servico = db.session.execute(
-        db.select(Manutencao_Servico).filter_by(id_servico=path.id)
+        db.select(ManutencaoServico).filter_by(id_servico=path.id)
     ).scalar_one_or_none()
     if manutencao_servico:
         return ErrorResponse(error="Serviço possui manutenções associadas e não pode ser deletado").model_dump(), 409
