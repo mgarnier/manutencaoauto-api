@@ -25,3 +25,32 @@ class ServicoComReferencias(ServicoErro):
 
 class ServicoErroOperacao(ServicoErro):
     pass
+
+
+class ManutencaoErro(Exception):
+    """Base exception for manutencao domain errors."""
+
+
+class ManutencaoNaoEncontrada(ManutencaoErro):
+    def __init__(self, message: str = "Manutenção não encontrada") -> None:
+        super().__init__(message)
+
+
+class ManutencaoDadosInvalidos(ManutencaoErro):
+    def __init__(
+        self,
+        message: str = "Informe data_prevista ou data_realizada",
+    ) -> None:
+        super().__init__(message)
+
+
+class ManutencaoComReferencias(ManutencaoErro):
+    def __init__(
+        self,
+        message: str = "Manutenção possui serviços associados e não pode ser deletada",
+    ) -> None:
+        super().__init__(message)
+
+
+class ManutencaoErroOperacao(ManutencaoErro):
+    pass
