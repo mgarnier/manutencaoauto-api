@@ -64,6 +64,7 @@ db.sqlite3-journal
 # Flask stuff:
 instance/
 .webassets-cache
+swagger_schema.json
 
 # Scrapy stuff:
 .scrapy
