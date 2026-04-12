@@ -1,1 +1,2 @@
-.\venv_manutencaoauto-api\Scripts\Activate.ps1
+@echo off
+call .\venv_manutencaoauto-api\Scripts\activate.bat

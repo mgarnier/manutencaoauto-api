@@ -1,4 +1,3 @@
 @echo off
 call .\venv_manutencaoauto-api\Scripts\activate.bat
-set FLASK_APP=app:app
-py -m flask run
+py -m unittest discover -s tests -p "test_*.py" -v
