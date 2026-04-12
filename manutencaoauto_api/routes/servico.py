@@ -23,7 +23,7 @@ servico_bp = APIBlueprint("servico", __name__)
     responses={"200": ServicoListResponse}
 )
 def listar_servicos() -> list:
-    servicos = Servico.query.all()
+    servicos = db.session.execute(db.select(Servico)).scalars().all()
     servico_responses = [ServicoResponse.model_validate(s) for s in servicos]
     return ServicoListResponse(servicos=servico_responses).model_dump()
 
@@ -36,7 +36,7 @@ def listar_servicos() -> list:
     responses={"200": ServicoResponse, "404": ErrorResponse}
 )
 def obter_servico(path: IdPathParam) -> dict:
-    servico = Servico.query.get(path.id)
+    servico = db.session.get(Servico, path.id)
     if not servico:
         return ErrorResponse(error="Serviço não encontrado").model_dump(), 404
     return ServicoResponse.model_validate(servico).model_dump()
@@ -77,11 +77,13 @@ def deletar_servico(path: IdPathParam) -> dict:
 
     Remove um serviço do banco de dados. Não permite deleção se há manutenções associadas.
     """
-    servico = Servico.query.get(path.id)
+    servico = db.session.get(Servico, path.id)
     if not servico:
         return ErrorResponse(error="Serviço não encontrado").model_dump(), 404
 
-    manutencao_servico = Manutencao_Servico.query.filter_by(id_servico=path.id).first()
+    manutencao_servico = db.session.execute(
+        db.select(Manutencao_Servico).filter_by(id_servico=path.id)
+    ).scalar_one_or_none()
     if manutencao_servico:
         return ErrorResponse(error="Serviço possui manutenções associadas e não pode ser deletado").model_dump(), 409
 
