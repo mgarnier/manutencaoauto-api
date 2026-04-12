@@ -1,21 +1,28 @@
-from typing import Any
+from typing import Any, cast
 
 from flask_openapi3.blueprint import APIBlueprint
 from flask_openapi3.models.tag import Tag
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from manutencaoauto_api.db import db
-from manutencaoauto_api.models import ManutencaoServico, Servico
+from manutencaoauto_api.exceptions import (
+    ServicoComReferencias,
+    ServicoErroOperacao,
+    ServicoJaExiste,
+    ServicoNaoEncontrado,
+)
 from manutencaoauto_api.schemas.common import ErrorResponse, IdPathParam, MessageResponse
 from manutencaoauto_api.schemas.servico import (
     ServicoCriacao,
     ServicoListResponse,
     ServicoResponse,
 )
+from manutencaoauto_api.services import ServicoService
 
 
 servico_tag = Tag(name="servico", description="Endpoints de serviços")
 servico_bp = APIBlueprint("servico", __name__)
+servico_service = ServicoService(cast(Session, db.session))
 
 JsonDict = dict[str, Any]
 RouteResponse = JsonDict | tuple[JsonDict, int]
@@ -29,7 +36,7 @@ RouteResponse = JsonDict | tuple[JsonDict, int]
     responses={"200": ServicoListResponse}
 )
 def listar_servicos() -> JsonDict:
-    servicos = db.session.execute(db.select(Servico)).scalars().all()
+    servicos = servico_service.listar()
     servico_responses = [ServicoResponse.model_validate(s) for s in servicos]
     return ServicoListResponse(servicos=servico_responses).model_dump()
 
@@ -42,10 +49,11 @@ def listar_servicos() -> JsonDict:
     responses={"200": ServicoResponse, "404": ErrorResponse}
 )
 def obter_servico(path: IdPathParam) -> RouteResponse:
-    servico = db.session.get(Servico, path.id)
-    if not servico:
-        return ErrorResponse(error="Serviço não encontrado").model_dump(), 404
-    return ServicoResponse.model_validate(servico).model_dump()
+    try:
+        servico = servico_service.obter(path.id)
+        return ServicoResponse.model_validate(servico).model_dump()
+    except ServicoNaoEncontrado as exc:
+        return ErrorResponse(error=str(exc)).model_dump(), 404
 
 
 @servico_bp.post(
@@ -65,21 +73,10 @@ def criar_servico(body: ServicoCriacao) -> RouteResponse:
     O body é validado pelo schema ServicoCriacao.
     """
     try:
-        novo_servico = Servico()
-        novo_servico.nome = body.nome
-        novo_servico.frequencia = body.frequencia
-        novo_servico.preco = body.preco
-        db.session.add(novo_servico)
-        db.session.commit()
+        novo_servico = servico_service.criar(body.nome, body.frequencia, body.preco)
         return ServicoResponse.model_validate(novo_servico).model_dump(), 201
-    except IntegrityError:
-        db.session.rollback()
-        return (
-            ErrorResponse(
-                error="Serviço com este nome já existe ou erro de integridade"
-            ).model_dump(),
-            400,
-        )
+    except ServicoJaExiste as exc:
+        return ErrorResponse(error=str(exc)).model_dump(), 400
 
 
 @servico_bp.delete(
@@ -97,25 +94,12 @@ def deletar_servico(path: IdPathParam) -> RouteResponse:
 
     Remove um serviço do banco de dados. Não permite deleção se há manutenções associadas.
     """
-    servico = db.session.get(Servico, path.id)
-    if not servico:
-        return ErrorResponse(error="Serviço não encontrado").model_dump(), 404
-
-    manutencao_servico = db.session.execute(
-        db.select(ManutencaoServico).filter_by(id_servico=path.id)
-    ).scalar_one_or_none()
-    if manutencao_servico:
-        return (
-            ErrorResponse(
-                error="Serviço possui manutenções associadas e não pode ser deletado"
-            ).model_dump(),
-            409,
-        )
-
     try:
-        db.session.delete(servico)
-        db.session.commit()
+        servico_service.deletar(path.id)
         return MessageResponse(message="Serviço deletado com sucesso").model_dump(), 200
-    except Exception as e:
-        db.session.rollback()
-        return ErrorResponse(error=f"Erro ao deletar serviço: {str(e)}").model_dump(), 400
+    except ServicoNaoEncontrado as exc:
+        return ErrorResponse(error=str(exc)).model_dump(), 404
+    except ServicoComReferencias as exc:
+        return ErrorResponse(error=str(exc)).model_dump(), 409
+    except ServicoErroOperacao as exc:
+        return ErrorResponse(error=str(exc)).model_dump(), 400
