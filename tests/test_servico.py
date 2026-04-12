@@ -1,15 +1,17 @@
 import unittest
 
-from app import app
+from app import create_app
+from config import TestingConfig
 from manutencaoauto_api.db import db
 
 
 class ServicoApiTestCase(unittest.TestCase):
     def setUp(self):
-        self.app = app
+        self.app = create_app(TestingConfig)
         self.client = self.app.test_client()
         self.app_context = self.app.app_context()
         self.app_context.push()
+        db.drop_all()
         db.create_all()
 
     def tearDown(self):
@@ -21,7 +23,7 @@ class ServicoApiTestCase(unittest.TestCase):
         payload = {
             "nome": "Troca de óleo",
             "frequencia": 90,
-            "preco": 199.90
+            "preco": 199.90,
         }
         response = self.client.post("/servicos", json=payload)
         self.assertEqual(response.status_code, 201)
@@ -37,7 +39,7 @@ class ServicoApiTestCase(unittest.TestCase):
         payload = {
             "nome": "Alinhamento",
             "frequencia": 180,
-            "preco": 120.00
+            "preco": 120.00,
         }
         first_response = self.client.post("/servicos", json=payload)
         self.assertEqual(first_response.status_code, 201)
