@@ -1,4 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
+from manutencaoauto_api.db import db, init_db
 
 
-db = SQLAlchemy()
+__all__ = ["db", "init_db"]
