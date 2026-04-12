@@ -29,25 +29,25 @@ class ServicoServiceTestCase(unittest.TestCase):
         self.app_context.pop()
 
     def test_criar_servico_com_sucesso(self):
-        servico = self.service.criar("Troca de óleo", 90, Decimal("199.90"))
+        servico = self.service.criar("Troca de óleo", 10000, Decimal("199.90"))
 
         self.assertIsNotNone(servico.id)
         self.assertEqual(servico.nome, "Troca de óleo")
-        self.assertEqual(servico.frequencia, 90)
+        self.assertEqual(servico.frequencia_km, 10000)
         self.assertEqual(servico.preco, Decimal("199.90"))
 
     def test_criar_servico_duplicado_lanca_erro(self):
-        self.service.criar("Alinhamento", 180, Decimal("120.00"))
+        self.service.criar("Alinhamento", 10000, Decimal("120.00"))
 
         with self.assertRaises(ServicoJaExiste):
-            self.service.criar("Alinhamento", 180, Decimal("120.00"))
+            self.service.criar("Alinhamento", 10000, Decimal("120.00"))
 
     def test_obter_servico_inexistente_lanca_erro(self):
         with self.assertRaises(ServicoNaoEncontrado):
             self.service.obter(999)
 
     def test_deletar_servico_com_referencias_lanca_erro(self):
-        servico = self.service.criar("Revisão", 180, Decimal("450.00"))
+        servico = self.service.criar("Revisão", 40000, Decimal("450.00"))
         manutencao = Manutencao(
             descricao="Revisão anual",
             quilometragem=45000,

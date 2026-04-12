@@ -26,10 +26,10 @@ class ServicoService:
             raise ServicoNaoEncontrado()
         return servico
 
-    def criar(self, nome: str, frequencia: int, preco: Decimal) -> Servico:
+    def criar(self, nome: str, frequencia_km: int, preco: Decimal) -> Servico:
         novo_servico = Servico()
         novo_servico.nome = nome
-        novo_servico.frequencia = frequencia
+        novo_servico.frequencia_km = frequencia_km
         novo_servico.preco = preco
 
         try:

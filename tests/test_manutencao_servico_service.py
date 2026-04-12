@@ -42,7 +42,7 @@ class ManutencaoServicoServiceTestCase(unittest.TestCase):
     def _criar_servico(self) -> Servico:
         servico = Servico()
         servico.nome = "Alinhamento"
-        servico.frequencia = 180
+        servico.frequencia_km = 10000
         servico.preco = Decimal("120.00")
         db.session.add(servico)
         db.session.commit()

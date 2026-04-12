@@ -23,7 +23,7 @@ class ServicoApiTestCase(unittest.TestCase):
     def test_criar_servico(self):
         payload = {
             "nome": "Troca de óleo",
-            "frequencia": 90,
+            "frequencia_km": 10000,
             "preco": 199.90,
         }
         response = self.client.post("/servicos", json=payload)
@@ -33,13 +33,13 @@ class ServicoApiTestCase(unittest.TestCase):
         self.assertIsInstance(data, dict)
         self.assertIn("id", data)
         self.assertEqual(data["nome"], payload["nome"])
-        self.assertEqual(data["frequencia"], payload["frequencia"])
+        self.assertEqual(data["frequencia_km"], payload["frequencia_km"])
         self.assertEqual(Decimal(str(data["preco"])), Decimal(str(payload["preco"])))
 
     def test_criar_servico_duplicado_retorna_400(self):
         payload = {
             "nome": "Alinhamento",
-            "frequencia": 180,
+            "frequencia_km": 10000,
             "preco": 120.00,
         }
         first_response = self.client.post("/servicos", json=payload)

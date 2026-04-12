@@ -33,7 +33,7 @@ class ManutencaoServicoApiTestCase(unittest.TestCase):
     def _criar_servico(self) -> int:
         payload = {
             "nome": "Troca de óleo",
-            "frequencia": 90,
+            "frequencia_km": 10000,
             "preco": 199.90,
         }
         response = self.client.post("/servicos", json=payload)

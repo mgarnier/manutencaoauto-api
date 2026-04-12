@@ -56,7 +56,7 @@ class ManutencaoServiceTestCase(unittest.TestCase):
         )
         servico = Servico()
         servico.nome = "Alinhamento"
-        servico.frequencia = 180
+        servico.frequencia_km = 10000
         servico.preco = 120
         db.session.add(servico)
         db.session.commit()

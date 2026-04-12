@@ -73,7 +73,7 @@ def criar_servico(body: ServicoCriacao) -> RouteResponse:
     O body é validado pelo schema ServicoCriacao.
     """
     try:
-        novo_servico = servico_service.criar(body.nome, body.frequencia, body.preco)
+        novo_servico = servico_service.criar(body.nome, body.frequencia_km, body.preco)
         return ServicoResponse.model_validate(novo_servico).model_dump(), 201
     except ServicoJaExiste as exc:
         return ErrorResponse(error=str(exc)).model_dump(), 400

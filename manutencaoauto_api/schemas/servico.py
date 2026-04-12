@@ -9,14 +9,14 @@ class ServicoCriacao(BaseModel):
         json_schema_extra={
             "example": {
                 "nome": "Troca de óleo",
-                "frequencia": 90,
+                "frequencia_km": 10000,
                 "preco": 199.90,
             }
         },
     )
 
     nome: str = Field(..., description="Nome do serviço")
-    frequencia: int = Field(..., description="Frequência do serviço em dias")
+    frequencia_km: int = Field(..., description="Frequência do serviço em km")
     preco: Decimal = Field(..., description="Preço do serviço")
 
 
@@ -25,7 +25,7 @@ class ServicoResponse(BaseModel):
 
     id: int = Field(..., description="ID do serviço")
     nome: str = Field(..., description="Nome do serviço")
-    frequencia: int = Field(..., description="Frequência do serviço em dias")
+    frequencia_km: int = Field(..., description="Frequência do serviço em km")
     preco: Decimal = Field(..., description="Preço do serviço")
 
 
