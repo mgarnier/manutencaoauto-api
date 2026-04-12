@@ -46,7 +46,10 @@ def obter_servico(path: IdPathParam) -> dict:
     "/servicos",
     tags=[servico_tag],
     summary="Criar serviço",
-    description="Cria um novo serviço no banco de dados usando um payload JSON com nome, frequência e preço.",
+    description=(
+        "Cria um novo serviço no banco de dados usando um payload JSON "
+        "com nome, frequência e preço."
+    ),
     responses={"201": ServicoResponse, "400": ErrorResponse, "422": ErrorResponse}
 )
 def criar_servico(body: ServicoCriacao) -> dict:
@@ -62,14 +65,22 @@ def criar_servico(body: ServicoCriacao) -> dict:
         return ServicoResponse.model_validate(novo_servico).model_dump(), 201
     except IntegrityError:
         db.session.rollback()
-        return ErrorResponse(error="Serviço com este nome já existe ou erro de integridade").model_dump(), 400
+        return (
+            ErrorResponse(
+                error="Serviço com este nome já existe ou erro de integridade"
+            ).model_dump(),
+            400,
+        )
 
 
 @servico_bp.delete(
     "/servicos/<int:id>",
     tags=[servico_tag],
     summary="Deletar serviço",
-    description="Deleta um serviço pelo seu ID. Retorna 409 se o serviço possui referências em manutenções",
+    description=(
+        "Deleta um serviço pelo seu ID. Retorna 409 se o serviço "
+        "possui referências em manutenções"
+    ),
     responses={"200": MessageResponse, "404": ErrorResponse, "409": ErrorResponse}
 )
 def deletar_servico(path: IdPathParam) -> dict:
@@ -85,7 +96,12 @@ def deletar_servico(path: IdPathParam) -> dict:
         db.select(ManutencaoServico).filter_by(id_servico=path.id)
     ).scalar_one_or_none()
     if manutencao_servico:
-        return ErrorResponse(error="Serviço possui manutenções associadas e não pode ser deletado").model_dump(), 409
+        return (
+            ErrorResponse(
+                error="Serviço possui manutenções associadas e não pode ser deletado"
+            ).model_dump(),
+            409,
+        )
 
     try:
         db.session.delete(servico)
