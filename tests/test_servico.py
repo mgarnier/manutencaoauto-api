@@ -1,4 +1,5 @@
 import unittest
+from decimal import Decimal
 
 from app import create_app
 from config import TestingConfig
@@ -33,7 +34,7 @@ class ServicoApiTestCase(unittest.TestCase):
         self.assertIn("id", data)
         self.assertEqual(data["nome"], payload["nome"])
         self.assertEqual(data["frequencia"], payload["frequencia"])
-        self.assertEqual(data["preco"], payload["preco"])
+        self.assertEqual(Decimal(str(data["preco"])), Decimal(str(payload["preco"])))
 
     def test_criar_servico_duplicado_retorna_400(self):
         payload = {

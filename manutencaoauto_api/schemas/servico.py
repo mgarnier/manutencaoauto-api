@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -15,7 +17,7 @@ class ServicoCriacao(BaseModel):
 
     nome: str = Field(..., description="Nome do serviço")
     frequencia: int = Field(..., description="Frequência do serviço em dias")
-    preco: float = Field(..., description="Preço do serviço")
+    preco: Decimal = Field(..., description="Preço do serviço")
 
 
 class ServicoResponse(BaseModel):
@@ -24,7 +26,7 @@ class ServicoResponse(BaseModel):
     id: int = Field(..., description="ID do serviço")
     nome: str = Field(..., description="Nome do serviço")
     frequencia: int = Field(..., description="Frequência do serviço em dias")
-    preco: float = Field(..., description="Preço do serviço")
+    preco: Decimal = Field(..., description="Preço do serviço")
 
 
 class ServicoListResponse(BaseModel):
