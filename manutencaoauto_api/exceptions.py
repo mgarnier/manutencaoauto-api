@@ -54,3 +54,27 @@ class ManutencaoComReferencias(ManutencaoErro):
 
 class ManutencaoErroOperacao(ManutencaoErro):
     pass
+
+
+class ManutencaoServicoErro(Exception):
+    """Base exception for manutencao_servico domain errors."""
+
+
+class ManutencaoServicoNaoEncontrado(ManutencaoServicoErro):
+    def __init__(
+        self,
+        message: str = "Associação manutenção-serviço não encontrada",
+    ) -> None:
+        super().__init__(message)
+
+
+class ManutencaoServicoJaAssociado(ManutencaoServicoErro):
+    def __init__(
+        self,
+        message: str = "Serviço já está associado a esta manutenção",
+    ) -> None:
+        super().__init__(message)
+
+
+class ManutencaoServicoErroOperacao(ManutencaoServicoErro):
+    pass
