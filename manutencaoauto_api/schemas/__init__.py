@@ -1,18 +1,15 @@
+from manutencaoauto_api.schemas.common import ErrorResponse, IdPathParam, MessageResponse
 from manutencaoauto_api.schemas.servico import (
     ServicoCriacao,
-    ServicoDeletadoResponse,
-    ServicoErroResponse,
     ServicoListResponse,
-    ServicoPathParam,
     ServicoResponse,
 )
 
-
 __all__ = [
+    "IdPathParam",
+    "MessageResponse",
+    "ErrorResponse",
     "ServicoCriacao",
     "ServicoResponse",
     "ServicoListResponse",
-    "ServicoPathParam",
-    "ServicoDeletadoResponse",
-    "ServicoErroResponse",
 ]

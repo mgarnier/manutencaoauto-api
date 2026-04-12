@@ -27,26 +27,3 @@ class ServicoResponse(BaseModel):
 
 class ServicoListResponse(BaseModel):
     servicos: list[ServicoResponse] = Field(..., description="Lista de serviços")
-
-
-class ServicoPathParam(BaseModel):
-    model_config = ConfigDict(title="Servico Path Parameters")
-
-    id: int = Field(..., description="ID do serviço")
-
-
-class ServicoDeletadoResponse(BaseModel):
-    message: str = Field(..., description="Mensagem de confirmação")
-
-
-class ServicoErroResponse(BaseModel):
-    model_config = ConfigDict(
-        title="Servico Error Response",
-        json_schema_extra={
-            "example": {
-                "error": "Serviço não encontrado"
-            }
-        },
-    )
-
-    error: str = Field(..., description="Mensagem de erro ao processar a requisição")
