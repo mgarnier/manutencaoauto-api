@@ -1,18 +1,17 @@
-from typing import List
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ServicoCriacao(BaseModel):
-    class Config:
-        title = "Servico Request Body"
-        schema_extra = {
+    model_config = ConfigDict(
+        title="Servico Request Body",
+        json_schema_extra={
             "example": {
                 "nome": "Troca de óleo",
                 "frequencia": 90,
                 "preco": 199.90,
             }
-        }
+        },
+    )
 
     nome: str = Field(..., description="Nome do serviço")
     frequencia: int = Field(..., description="Frequência do serviço em dias")
@@ -27,12 +26,11 @@ class ServicoResponse(BaseModel):
 
 
 class ServicoListResponse(BaseModel):
-    servicos: List[ServicoResponse] = Field(..., description="Lista de serviços")
+    servicos: list[ServicoResponse] = Field(..., description="Lista de serviços")
 
 
 class ServicoPathParam(BaseModel):
-    class Config:
-        title = "Servico Path Parameters"
+    model_config = ConfigDict(title="Servico Path Parameters")
 
     id: int = Field(..., description="ID do serviço")
 
@@ -42,12 +40,13 @@ class ServicoDeletadoResponse(BaseModel):
 
 
 class ServicoErroResponse(BaseModel):
-    class Config:
-        title = "Servico Error Response"
-        schema_extra = {
+    model_config = ConfigDict(
+        title="Servico Error Response",
+        json_schema_extra={
             "example": {
                 "error": "Serviço não encontrado"
             }
-        }
+        },
+    )
 
     error: str = Field(..., description="Mensagem de erro ao processar a requisição")

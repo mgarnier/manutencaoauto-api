@@ -27,7 +27,7 @@ servico_bp = APIBlueprint("servico", __name__)
 def listar_servicos() -> list:
     servicos = Servico.query.all()
     servico_responses = [ServicoResponse(id=s.id, nome=s.nome, frequencia=s.frequencia, preco=s.preco) for s in servicos]
-    return ServicoListResponse(servicos=servico_responses).dict()
+    return ServicoListResponse(servicos=servico_responses).model_dump()
 
 
 @servico_bp.get(
@@ -40,8 +40,8 @@ def listar_servicos() -> list:
 def obter_servico(path: ServicoPathParam) -> dict:
     servico = Servico.query.get(path.id)
     if not servico:
-        return ServicoErroResponse(error="Serviço não encontrado").dict(), 404
-    return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).dict()
+        return ServicoErroResponse(error="Serviço não encontrado").model_dump(), 404
+    return ServicoResponse(id=servico.id, nome=servico.nome, frequencia=servico.frequencia, preco=servico.preco).model_dump()
 
 
 @servico_bp.post(
@@ -61,10 +61,10 @@ def criar_servico(body: ServicoCriacao) -> dict:
         novo_servico = Servico(nome=body.nome, frequencia=body.frequencia, preco=body.preco)
         db.session.add(novo_servico)
         db.session.commit()
-        return ServicoResponse(id=novo_servico.id, nome=novo_servico.nome, frequencia=novo_servico.frequencia, preco=novo_servico.preco).dict(), 201
+        return ServicoResponse(id=novo_servico.id, nome=novo_servico.nome, frequencia=novo_servico.frequencia, preco=novo_servico.preco).model_dump(), 201
     except IntegrityError:
         db.session.rollback()
-        return ServicoErroResponse(error="Serviço com este nome já existe ou erro de integridade").dict(), 400
+        return ServicoErroResponse(error="Serviço com este nome já existe ou erro de integridade").model_dump(), 400
 
 
 @servico_bp.delete(
@@ -81,16 +81,16 @@ def deletar_servico(path: ServicoPathParam) -> dict:
     """
     servico = Servico.query.get(path.id)
     if not servico:
-        return ServicoErroResponse(error="Serviço não encontrado").dict(), 404
+        return ServicoErroResponse(error="Serviço não encontrado").model_dump(), 404
 
     manutencao_servico = Manutencao_Servico.query.filter_by(id_servico=path.id).first()
     if manutencao_servico:
-        return ServicoErroResponse(error="Serviço possui manutenções associadas e não pode ser deletado").dict(), 409
+        return ServicoErroResponse(error="Serviço possui manutenções associadas e não pode ser deletado").model_dump(), 409
 
     try:
         db.session.delete(servico)
         db.session.commit()
-        return ServicoDeletadoResponse(message="Serviço deletado com sucesso").dict(), 200
+        return ServicoDeletadoResponse(message="Serviço deletado com sucesso").model_dump(), 200
     except Exception as e:
         db.session.rollback()
-        return ServicoErroResponse(error=f"Erro ao deletar serviço: {str(e)}").dict(), 400
+        return ServicoErroResponse(error=f"Erro ao deletar serviço: {str(e)}").model_dump(), 400
